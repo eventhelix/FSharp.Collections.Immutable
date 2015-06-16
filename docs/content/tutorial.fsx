@@ -13,7 +13,6 @@ Say more
 #r "FSharp.Collections.Immutable.dll"
 open FSharp.Collections.Immutable
 
-Library.hello 0
 (**
 Some more info
 *)
