@@ -1,0 +1,23 @@
+type project
+owners
+    Saagar Ahluwalia
+authors 
+    Saagar Ahluwalia
+projectUrl
+    http://github.com/eventhelix/FSharp.Collections.Immutable
+iconUrl
+    https://raw.githubusercontent.com/eventhelix/FSharp.Collections.Immutable/master/docs/files/img/logo.png
+licenseUrl
+    http://github.com/eventhelix/FSharp.Collections.Immutable/blob/master/LICENSE.txt
+requireLicenseAcceptance
+    false
+copyright
+    Copyright 2015
+tags
+    collections fsharp immutable functional
+summary
+    F# bindings for System.Collections.Immutable.
+description
+    F# bindings for System.Collections.Immutable. F# styles modules for operating on Immutable collections and conversion to and from F# collections. F#-specific type abbreviations for some collections are also present
+
+
