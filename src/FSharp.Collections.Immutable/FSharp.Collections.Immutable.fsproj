@@ -45,6 +45,7 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="immutable-collection-util.fs" />
     <Compile Include="immutable-list.fs" />
     <None Include="Script.fsx" />
     <None Include="paket.references" />

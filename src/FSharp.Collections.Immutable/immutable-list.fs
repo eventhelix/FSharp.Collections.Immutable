@@ -1,28 +1,36 @@
 [<RequireQualifiedAccess; CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module FSharp.Collections.Immutable.ImmutableList
+
+open FSharp.Collections.Immutable.ImmutableCollectionUtil
+
 open System.Collections.Immutable 
 open System.Collections.Generic
 open System
 
-let builder() = ImmutableList.CreateBuilder()
+let inline check list = checkNotNull "list" list
 
-let ofSeq (seq: 'T seq) = ImmutableList.CreateRange seq
-let ofList list =
-    let rec convert (builder: ImmutableList<'T>.Builder) list =
-        match list with
-        |[] -> builder.ToImmutable()
-        |head::tail -> builder.Add(head); convert builder list
-    convert (builder()) list
-let toArray (list: ImmutableList<_>) =
-    let array = Array.zeroCreate list.Count
-    list.CopyTo(array)
-    array
+////////// IReadOnly* //////////
+
+let count (list: IImmutableList<_>) = check list; list.Count
+
+let item index (list: IImmutableList<_>) = check list; list.[index]
 
 
-let withItem index value (list: IImmutableList<_>) =
-    list.SetItem(index, value)
+////////// IImmutableList //////////
 
-let replace oldValue value (list: IImmutableList<_>) = list.Replace(oldValue, value, HashIdentity.Structural)
+
+/// Replaces an element in the list at a given position with the specified element.
+let withItem index value (list: IImmutableList<_>) = check list; list.SetItem(index, value)
+
+/// Returns a new list with the first matching element in the list replaced with the specified element with
+/// the given comparer.
+let replaceWith comparer oldValue value (list: IImmutableList<_>) =
+    check list
+    list.Replace(oldValue, value, comparer)
+
+/// Returns a new list with the first matching element in the list replaced with the specified element.
+let replace oldValue value (list: IImmutableList<_>) =
+    replaceWith HashIdentity.Structural oldValue value list
         
 
 /// <summary>
@@ -30,46 +38,60 @@ let replace oldValue value (list: IImmutableList<_>) = list.Replace(oldValue, va
 /// this list.
 /// </summary>
 /// <param name="list"></param>
-let clear (list: IImmutableList<_>) = list.Clear()
+let clear (list: IImmutableList<_>) = check list; list.Clear()
 
 /// Makes a copy of the list, and adds the specified object to the end of the copied list.
-let add item (list: IImmutableList<_>) = list.Add item
+let add item (list: IImmutableList<_>) = check list; list.Add item
 
 
 /// Makes a copy of the list and adds the specified objects to the end of the copied list.
-let append (list: IImmutableList<_>) items = list.AddRange items
+let append (list: IImmutableList<_>) items = check list; list.AddRange items
 
 /// Inserts the specified element at the specified index in a immutable list.
-let insert index item (list: IImmutableList<_>) = list.Insert(index, item)
+let insert index item (list: IImmutableList<_>) = check list; list.Insert(index, item)
 
 /// Inserts the specified elements at the specified index in the immutable list.
-let insertRange index items (list: IImmutableList<_>) = list.InsertRange(index, items) // TODO: rename
-    
-let remove item (list: IImmutableList<_>) = list.Remove(item, HashIdentity.Structural)
-let removeWith comparer item (list: IImmutableList<_>) =
-    list.Remove(item, comparer)
+let insertRange index items (list: IImmutableList<_>) = check list; list.InsertRange(index, items) // TODO: rename
 
-let except items (list: IImmutableList<_>) = list.RemoveRange(items, HashIdentity.Structural)
+
+/// Removes the first occurrence of a specified object from this immutable list using the given comparer.
+let removeWith comparer item (list: IImmutableList<_>) = check list; list.Remove(item, comparer)
+
+/// Removes the first occurrence of a specified object from this immutable list.
+let remove item list = removeWith HashIdentity.Structural item list
+
+
+
+/// Removes the specified objects from the list with the given comparer.
 let exceptWith (comparer: IEqualityComparer<_>) items (list: IImmutableList<_>) =
+    check list
     list.RemoveRange(items, comparer)
 
+/// Removes the specified objects from the list.
+let except items list = exceptWith HashIdentity.Structural items list
+
+
+/// Removes all the elements that do not match the conditions defined by the specified predicate.
 let filter predicate (list: IImmutableList<_>) =
         Predicate(not << predicate)
         |> list.RemoveAll
 
-let removeRange index (count: int) (list: IImmutableList<_>) = list.RemoveRange(index, count)
+/// Removes a range of elements from the System.Collections.Immutable.IImmutableList`1.
+let removeRange index (count: int) (list: IImmutableList<_>) = check list; list.RemoveRange(index, count)
 
-let removeAt index (list: IImmutableList<_>) = list.RemoveAt index
+/// Removes the element at the specified index of the immutable list.
+let removeAt index (list: IImmutableList<_>) = check list; list.RemoveAt index
 
 /// Searches for the specified object and returns the zero-based index of the first occurrence within the range
-/// of elements in the < that starts at the specified index and
+/// of elements in the list that starts at the specified index and
 /// contains the specified number of elements.
 let indexRangeWith comparer index count item (list: IImmutableList<_>) =
+    check list;
     list.IndexOf(item, index, count, comparer)
 let indexRange index count item list =
     indexRangeWith HashIdentity.Structural index count item list
 let indexFromWith comparer index item list =
-    list |> indexRangeWith comparer index (list.Count - index) item 
+    indexRangeWith comparer index (count list - index) item 
 let indexFrom index item list =
     indexFromWith HashIdentity.Structural index item list
 let indexWith comparer item list =
@@ -78,9 +100,10 @@ let index item list = indexWith HashIdentity.Structural item list
     
 
 /// Searches for the specified object and returns the zero-based index of the last occurrence within the
-/// range of elements in the System.Collections.Immutable.IImmutableList`1 that contains the specified number
+/// range of elements in the list that contains the specified number
 /// of elements and ends at the specified index.
 let lastIndexRangeWith comparer index count item (list: IImmutableList<_>) =
+    check list
     list.LastIndexOf(item, index, count, comparer)
 let lastIndexRange index count item list =
     lastIndexRangeWith HashIdentity.Structural index count item list
@@ -89,5 +112,107 @@ let lastIndexFromWith comparer index item list =
 let lastIndexFrom index item list =
     lastIndexFromWith HashIdentity.Structural index item list
 let lastIndexWith comparer item list =
-    list |> lastIndexFromWith comparer (list.Count - 1) item
+    lastIndexFromWith comparer (count list - 1) item list
 let lastIndex item list = lastIndexWith HashIdentity.Structural item list
+
+
+////////
+
+
+////////
+
+let take length list =
+    removeRange length (count list - length) list
+
+let skip index list = removeRange 0 index list
+
+let head list = item 0 list
+
+let tryItem index list =
+    if index < count list then Some <| item index list
+    else None
+
+let tryHead list = tryItem 0 list
+
+
+let last list = item (count list - 1) list
+
+let tryLast list = tryItem (count list - 1) list
+
+////////
+
+
+
+
+////////
+
+
+let filterFold (predicate: 'State -> 'T -> bool * 'State) initial list =
+    let state = ref initial
+    filter (fun item -> 
+        let condition, state' = predicate !state item
+        state := state'
+        condition) list, state
+
+let skipWhile predicate list =
+    let condition = ref true
+    filter (fun item ->
+        if !condition then
+            condition := !condition && predicate item
+            !condition
+        else false) list
+
+let skipUntil predicate list = skipWhile (not << predicate) list
+
+let takeWhile predicate list =
+    let condition = ref true
+    filter (fun item ->
+        if !condition then
+            condition := !condition && predicate item
+            not !condition
+        else true) list
+let takeUntil predicate list = takeWhile (not << predicate) list
+
+
+
+
+////////// Creating //////////
+
+
+let ofSeq (seq: 'T seq) =
+    checkNotNull "seq" seq
+    ImmutableList.CreateRange seq
+let ofList list = ofSeq list
+
+let toArray (list: IImmutableList<'T>) =
+    check list
+    match list with
+    | :? ICollection<'T> as collection ->
+        let array = Array.zeroCreate list.Count
+        collection.CopyTo(array, 0)
+        array
+    |_ -> Array.ofSeq list
+
+let empty<'T> = ImmutableList.Create<'T>()
+
+////////// Building //////////
+
+let ofBuilder (builder: ImmutableList<_>.Builder) = builder.ToImmutable()
+
+
+let builder() = ImmutableList.CreateBuilder()
+
+let build f =
+    let builder = builder()
+    f builder
+    builder.ToImmutable()
+
+let toBuilder (list: ImmutableList<_>) = list.ToBuilder()
+
+
+let update f list =
+    let builder = toBuilder list
+    f builder
+    builder.ToImmutable()
+
+    
