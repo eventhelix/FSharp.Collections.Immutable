@@ -24,6 +24,11 @@ module FlatList =
 
     let item index list = check list; list.[index]
 
+    let append list1 list2: FlatList<'T> =
+        checkNotDefault "list1" list1
+        checkNotDefault "list2" list2
+        list1.AddRange(list2: FlatList<_>)
+
     /// Searches for the specified object and returns the zero-based index of the first occurrence within the range
     /// of elements in the list that starts at the specified index and
     /// contains the specified number of elements.
@@ -112,16 +117,12 @@ module FlatList =
         f builder
         ofBuilderMove builder
 
+    let inline private builderWithLengthOf list = builderWith <| length list
 
     ////////// Loop-based //////////
 
     let init count initializer =
-        if count < 0 then
-            // throw the same exception
-            try
-                Array.init count initializer |> ignore
-            with
-            |exn -> raise exn // use correct stack trace
+        if count < 0 then invalidArg "count" ErrorStrings.InputMustBeNonNegative
         let builder = builderWith count
         for i = 0 to count - 1 do
             builder.Add <| initializer i
@@ -137,14 +138,72 @@ module FlatList =
             result.AddRange(arrs.[i]: FlatList<'T>)
         ofBuilderMove result
 
+    let inline map mapping list =
+        check list
+        let builder = builderWithLengthOf list
+        for i = 0 to length list - 1 do
+            builder.Add(mapping list.[i])
+        ofBuilderMove builder
+
+    let countBy projection list =
+        check list
+        // need struct box optimization
+        let dict = new System.Collections.Generic.Dictionary<'Key, int>(HashIdentity.Structural)
+
+        // Build the groupings
+        for v in list do
+            let key = projection v
+            let mutable prev = Unchecked.defaultof<_>
+            if dict.TryGetValue(key, &prev) then dict.[key] <- prev + 1 else dict.[key] <- 1
+
+        let res = builderWith dict.Count
+        let mutable i = 0
+        for group in dict do
+            res.Add(group.Key, group.Value)
+            i <- i + 1
+        ofBuilderMove res
+    
+    let indexed list =
+        check list
+        let builder = builderWithLengthOf list
+        for i = 0 to length list - 1 do
+            builder.Add(i, list.[i])
+        ofBuilderMove builder
+
+    let inline iter action list =
+        check list
+        for i = 0 to length list - 1 do
+            action list.[i]
+
+    let iter2 action list1 list2 =
+        checkNotDefault "list1" list1
+        checkNotDefault "list2" list2
+        let f = OptimizedClosures.FSharpFunc<'T,'U, unit>.Adapt(action)
+        let len = length list1
+        if len <> length list2 then invalidArg "list2" ErrorStrings.ArraysHaveDifferentLengths
+        for i = 0 to len - 1 do
+            f.Invoke(list1.[i], list2.[i])
+
+
     ////////// Based on other operations //////////
 
-    let take count list =
-        removeRange count (length list - count) list
+    let take count list = removeRange count (length list - count) list
+
+    let inline private lengthWhile predicate list =
+        check list
+        let mutable count = 0
+        while count < list.Length && predicate list.[count] do
+            count <- count + 1
+        count
+    let takeWhile predicate list = check list; take (lengthWhile predicate list) list
 
     let skip index list = removeRange 0 index list
 
+    let skipWhile predicate list = check list; skip (lengthWhile predicate list) list
+
     let truncate count list = if count < length list then take count list else list
+    
+    let splitAt index list = take index list, skip index list
 
     let head list = item 0 list
 
@@ -165,6 +224,9 @@ module FlatList =
 
     let create count item = init count <| fun _ -> item // optimize
 
+    let replicate count item = create item count
+
+    let collect mapping list = concat <| map mapping list
 
     ////////// Creating //////////
 

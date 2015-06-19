@@ -10,4 +10,10 @@ module ImmutableCollectionUtil =
         match arg with
         |null -> nullArg name
         |_ -> ()
-    
+   
+module ErrorStrings =
+    [<Literal>]
+    let InputMustBeNonNegative = "The input must be non-negative."
+
+    [<Literal>]
+    let ListsHaveDifferentLengths = "The lists have different lengths."
