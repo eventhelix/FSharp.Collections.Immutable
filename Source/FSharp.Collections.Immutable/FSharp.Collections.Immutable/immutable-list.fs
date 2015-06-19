@@ -17,7 +17,7 @@ module ImmutableList =
 
     ////////// IReadOnly* //////////
 
-    let count list = check list; list.Count
+    let length list = check list; list.Count
 
     let item index list = check list; list.[index]
 
@@ -66,7 +66,7 @@ module ImmutableList =
 
 
     /// Removes the specified objects from the list with the given comparer.
-    let exceptWith (comparer: IEqualityComparer<_>) items (list: IImmutableList<_>) =
+    let exceptWith (comparer: IEqualityComparer<_>) items list =
         check list
         list.RemoveRange(items, comparer)
 
@@ -75,26 +75,27 @@ module ImmutableList =
 
 
     /// Removes all the elements that do not match the conditions defined by the specified predicate.
-    let filter predicate (list: IImmutableList<_>) =
-            Predicate(not << predicate)
-            |> list.RemoveAll
+    let filter predicate list =
+        check list    
+        Predicate(not << predicate)
+        |> list.RemoveAll
 
     /// Removes a range of elements from the System.Collections.Immutable.IImmutableList`1.
-    let removeRange index (count: int) (list: IImmutableList<_>) = check list; list.RemoveRange(index, count)
+    let removeRange index (count: int) list = check list; list.RemoveRange(index, count)
 
     /// Removes the element at the specified index of the immutable list.
-    let removeAt index (list: IImmutableList<_>) = check list; list.RemoveAt index
+    let removeAt index list = check list; list.RemoveAt index
 
     /// Searches for the specified object and returns the zero-based index of the first occurrence within the range
     /// of elements in the list that starts at the specified index and
     /// contains the specified number of elements.
-    let indexRangeWith comparer index count item (list: IImmutableList<_>) =
+    let indexRangeWith comparer index count item list =
         check list;
         list.IndexOf(item, index, count, comparer)
     let indexRange index count item list =
         indexRangeWith HashIdentity.Structural index count item list
     let indexFromWith comparer index item list =
-        indexRangeWith comparer index (count list - index) item 
+        indexRangeWith comparer index (length list - index) item 
     let indexFrom index item list =
         indexFromWith HashIdentity.Structural index item list
     let indexWith comparer item list =
@@ -105,7 +106,7 @@ module ImmutableList =
     /// Searches for the specified object and returns the zero-based index of the last occurrence within the
     /// range of elements in the list that contains the specified number
     /// of elements and ends at the specified index.
-    let lastIndexRangeWith comparer index count item (list: IImmutableList<_>) =
+    let lastIndexRangeWith comparer index count item list =
         check list
         list.LastIndexOf(item, index, count, comparer)
     let lastIndexRange index count item list =
@@ -115,7 +116,7 @@ module ImmutableList =
     let lastIndexFrom index item list =
         lastIndexFromWith HashIdentity.Structural index item list
     let lastIndexWith comparer item list =
-        lastIndexFromWith comparer (count list - 1) item list
+        lastIndexFromWith comparer (length list - 1) item list
     let lastIndex item list = lastIndexWith HashIdentity.Structural item list
 
 
@@ -204,31 +205,37 @@ module ImmutableList =
 
     ////////// Based on other operations //////////
 
-    let take length list =
-        removeRange length (count list - length) list
+    let isEmpty list = length list = 0
+
+    let take count list =
+        removeRange count (length list - count) list
 
     let skip index list = removeRange 0 index list
 
-    let truncate length list = if length < count list then take length list else list
+    let truncate count list = if count < length list then take count list else list
+
 
     let head list = item 0 list
 
+    let last list = item (length list - 1) list
+
+    let tail list = removeAt 0 list
+
     let tryItem index list =
-        if index < count list then Some <| item index list
+        if index < length list then Some <| item index list
         else None
 
     let tryHead list = tryItem 0 list
 
+    let tryLast list = tryItem (length list - 1) list
 
-    let last list = item (count list - 1) list
+    let tryTail list = if isEmpty list then None else Some <| tail list
 
-    let tryLast list = tryItem (count list - 1) list
 
     let collect mapping list = concat <| map mapping list
 
     let cons head list = insert 0 head list
 
-    let tail list = removeAt 0 list
 
     ////////// Creating & converting //////////
     
@@ -255,7 +262,7 @@ module ImmutableList =
             with 
             |exn -> raise exn // get the right stack trace
         build <| fun builder ->
-            for i = 0 to count do
+            for i = 0 to count - 1 do
                 builder.Add <| initializer i
     let unfold generator state =
         let rec unfoldLoop state (builder: ImmutableList<_>.Builder) =

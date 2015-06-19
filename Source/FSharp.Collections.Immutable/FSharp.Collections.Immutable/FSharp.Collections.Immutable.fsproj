@@ -47,6 +47,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="immutable-collection-util.fs" />
+    <Compile Include="flat-list.fs" />
     <Compile Include="immutable-stack.fs" />
     <Compile Include="immutable-list.fs" />
     <None Include="packages.config" />
