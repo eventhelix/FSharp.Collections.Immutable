@@ -119,6 +119,11 @@ module FlatList =
 
     let inline private builderWithLengthOf list = builderWith <| length list
 
+    module Builder =
+        let inline private check (builder: FlatList<'T>.Builder) = checkNotNull "builder" builder
+
+        let add item builder = check builder; builder.Add(item)
+
     ////////// Loop-based //////////
 
     let init count initializer =
@@ -180,9 +185,108 @@ module FlatList =
         checkNotDefault "list2" list2
         let f = OptimizedClosures.FSharpFunc<'T,'U, unit>.Adapt(action)
         let len = length list1
-        if len <> length list2 then invalidArg "list2" ErrorStrings.ArraysHaveDifferentLengths
+        if len <> length list2 then invalidArg "list2" ErrorStrings.ListsHaveDifferentLengths
         for i = 0 to len - 1 do
             f.Invoke(list1.[i], list2.[i])
+
+    let distinctBy projection (list: FlatList<'T>) = 
+        let builder: FlatList<'T>.Builder = builderWith <| length list
+        let set = System.Collections.Generic.HashSet<'Key>(HashIdentity.Structural)
+        let mutable outputIndex = 0
+        
+        for i = 0 to length list - 1 do
+            let item = list.[i]
+            if set.Add <| projection item then
+                outputIndex <- outputIndex + 1
+                Builder.add item builder
+        
+        ofBuilderMove builder
+
+    let map2 mapping list1 list2 = 
+        checkNotDefault "list1" list1
+        checkNotDefault "list2" list2
+        let f = OptimizedClosures.FSharpFunc<_,_,_>.Adapt(mapping)
+        let len1 = list1.Length 
+        if len1 <> list2.Length then invalidArg "list2" ErrorStrings.ListsHaveDifferentLengths
+        let res = builderWith len1
+        for i = 0 to len1 - 1 do 
+            res.Add <| f.Invoke(list1.[i], list2.[i])
+        ofBuilderMove res
+
+    let map3 mapping list1 list2 list3 = 
+        checkNotDefault "list1" list1
+        checkNotDefault "list2" list2
+        checkNotDefault "list3" list3
+        let f = OptimizedClosures.FSharpFunc<_,_,_,_>.Adapt(mapping)
+        let len1 = list1.Length
+        if not (len1 = list2.Length && len1 = list3.Length) then invalidArg "" ErrorStrings.ListsHaveDifferentLengths
+            
+        let res = builderWith len1
+        for i = 0 to len1 - 1 do
+            res.Add <| f.Invoke(list1.[i], list2.[i], list3.[i])
+        ofBuilderMove res
+    let mapi2 mapping list1 list2 = 
+        checkNotDefault "list1" list1
+        checkNotDefault "list2" list2
+        let f = OptimizedClosures.FSharpFunc<_,_,_,_>.Adapt(mapping)
+        let len1 = list1.Length 
+        if len1 <> list2.Length then invalidArg "list2" ErrorStrings.ListsHaveDifferentLengths
+        let res = builderWith len1 
+        for i = 0 to len1 - 1 do 
+            res.Add <| f.Invoke(i,list1.[i], list2.[i])
+        ofBuilderMove res
+
+    let iteri action list =
+        check list
+        let f = OptimizedClosures.FSharpFunc<_,_,_>.Adapt(action)
+        let len = list.Length
+        for i = 0 to len - 1 do 
+            f.Invoke(i, list.[i])
+
+    let iteri2 action list1 list2 = 
+        checkNotDefault "list1" list1
+        checkNotDefault "list2" list2
+        let f = OptimizedClosures.FSharpFunc<_,_,_,_>.Adapt(action)
+        let len1 = list1.Length 
+        if len1 <> list2.Length then invalidArg "list2" ErrorStrings.ListsHaveDifferentLengths
+        for i = 0 to len1 - 1 do 
+            f.Invoke(i,list1.[i], list2.[i])
+
+    let mapi mapping list =
+        check list
+        let f = OptimizedClosures.FSharpFunc<_,_,_>.Adapt(mapping)
+        let len = list.Length
+        let res = builderWithLengthOf list
+        for i = 0 to len - 1 do 
+            res.Add <| f.Invoke(i,list.[i])
+        ofBuilderMove res
+
+    let exists predicate list =
+        check list
+        let len = list.Length
+        let rec loop i = i < len && (predicate list.[i] || loop (i+1))
+        loop 0
+
+    let inline contains e list =
+        check list
+        let mutable state = false
+        let mutable i = 0
+        while (not state && i < list.Length) do
+            state <- e = list.[i]
+            i <- i + 1
+        state
+
+    let exists2 predicate list1 list2 = 
+        checkNotDefault "list1" list1
+        checkNotDefault "list2" list2
+        let f = OptimizedClosures.FSharpFunc<_,_,_>.Adapt(predicate)
+        let len1 = list1.Length
+        if len1 <> list2.Length then invalidArg "list2" ErrorStrings.ListsHaveDifferentLengths
+        let rec loop i = i < len1 && (f.Invoke(list1.[i], list2.[i]) || loop (i+1))
+        loop 0
+
+
+
 
 
     ////////// Based on other operations //////////
