@@ -48,8 +48,10 @@
   <ItemGroup>
     <Compile Include="immutable-collection-util.fs" />
     <Compile Include="flat-list.fs" />
-    <Compile Include="immutable-stack.fs" />
+    <Compile Include="stack.fs" />
     <Compile Include="immutable-list.fs" />
+    <Compile Include="queue.fs" />
+    <Compile Include="indexed-seq.fs" />
     <None Include="packages.config" />
     <None Include="Script.fsx" />
   </ItemGroup>
