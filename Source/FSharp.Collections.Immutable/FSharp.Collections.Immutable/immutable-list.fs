@@ -120,6 +120,15 @@ module ImmutableList =
     let lastIndex item list = lastIndexWith HashIdentity.Structural item list
 
 
+    ////////// Factory //////////
+    
+    let empty<'T> = ImmutableList.Create<'T>()
+
+
+    let ofSeq (seq: 'T seq) =
+        checkNotNull "seq" seq
+        ImmutableList.CreateRange seq
+
     ////////
 
 
@@ -237,12 +246,7 @@ module ImmutableList =
     let cons head list = insert 0 head list
 
 
-    ////////// Creating & converting //////////
     
-
-    let ofSeq (seq: 'T seq) =
-        checkNotNull "seq" seq
-        ImmutableList.CreateRange seq
 
 
 
@@ -252,7 +256,6 @@ module ImmutableList =
 
     
 
-    let empty<'T> = ImmutableList.Create<'T>()
 
     let init count initializer =
         if count < 0 then

@@ -2,3 +2,8 @@
 
 type IIndexedSeq<'T> = System.Collections.Generic.IReadOnlyList<'T>
 
+module IndexedSeq =
+    let check (seq: IIndexedSeq<_>) = checkNotNull "seq" seq
+    let item index seq = check seq; seq.[index]
+    let length seq = check seq; seq.Count
+

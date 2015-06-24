@@ -74,12 +74,12 @@ module FlatList =
     let isDefaultOrEmpty (list: FlatList<_>) = list.IsDefaultOrEmpty
 
     /// Removes the specified objects from the list with the given comparer.
-    let exceptWith (comparer: System.Collections.Generic.IEqualityComparer<_>) items list: FlatList<_> =
+    let removeAllWith (comparer: System.Collections.Generic.IEqualityComparer<_>) items list: FlatList<_> =
         check list
         list.RemoveRange(items, comparer)
 
     /// Removes the specified objects from the list.
-    let except items list = exceptWith HashIdentity.Structural items list
+    let removeAll items list = removeAllWith HashIdentity.Structural items list
 
 
     /// Removes all the elements that do not match the conditions defined by the specified predicate.
