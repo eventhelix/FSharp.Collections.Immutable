@@ -38,5 +38,5 @@ module Stack =
 
     /////////////
 
-
+module ImmutableStack = Stack
 

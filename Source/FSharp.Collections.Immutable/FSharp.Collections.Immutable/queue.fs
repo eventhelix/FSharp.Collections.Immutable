@@ -80,6 +80,6 @@ module Queue =
     let inline average queue = check queue; Seq.average queue
     let inline averageBy projection queue = check queue; Seq.averageBy projection
 
-
+module ImmutableQueue = Queue
 
 

@@ -458,7 +458,7 @@ module FlatList =
 
     //////////
 
-    
+module ImmutableArray = FlatList    
 
     
 

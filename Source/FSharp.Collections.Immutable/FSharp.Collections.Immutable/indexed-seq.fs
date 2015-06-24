@@ -7,3 +7,4 @@ module IndexedSeq =
     let item index seq = check seq; seq.[index]
     let length seq = check seq; seq.Count
 
+module ReadOnlyList = IndexedSeq
