@@ -52,6 +52,7 @@
     <Compile Include="immutable-list.fs" />
     <Compile Include="queue.fs" />
     <Compile Include="indexed-seq.fs" />
+    <Compile Include="maps.fs" />
     <None Include="packages.config" />
     <None Include="Script.fsx" />
   </ItemGroup>

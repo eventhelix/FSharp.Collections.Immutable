@@ -408,6 +408,21 @@ module FlatList =
         loop <| length list - 1
 
 
+    let findIndexBack predicate list =
+        check list
+        let rec loop i = 
+            if i < 0 then indexNotFound() else
+            if predicate list.[i] then i  else loop (i - 1)
+        loop <| length list - 1
+
+    let tryFindIndexBack predicate list =
+        check list
+        let rec loop i = 
+            if i < 0 then None else
+            if predicate list.[i] then Some i  else loop (i - 1)
+        loop <| length list - 1
+    // TODO: windowed
+
 
 
     ////////// Based on other operations //////////
