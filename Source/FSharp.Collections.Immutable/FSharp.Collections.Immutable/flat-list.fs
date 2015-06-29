@@ -14,6 +14,22 @@ module FlatList =
 
     type internal FlatListFactory = System.Collections.Immutable.ImmutableArray
 
+    let ofSeq source: FlatList<'T> = FlatListFactory.CreateRange source
+
+    let empty<'T> : FlatList<_> = FlatListFactory.Create<'T>()
+
+    ////////// Building //////////
+
+    let moveFromBuilder (builder: FlatList<_>.Builder): FlatList<_> = 
+        checkNotNull "builder" builder
+        builder.MoveToImmutable()
+    let ofBuilder (builder: FlatList<_>.Builder): FlatList<_> = 
+        checkNotNull "builder" builder
+        builder.ToImmutable()
+
+    let builder(): FlatList<'T>.Builder = FlatListFactory.CreateBuilder()
+    let builderWith capacity: FlatList<'T>.Builder = FlatListFactory.CreateBuilder(capacity)
+
     let inline checkNotDefault argName (list: FlatList<'T>) =
         if list.IsDefault then invalidArg argName "Uninstantiated ImmutableArray/FlatList"
     let inline check (list: FlatList<'T>) = checkNotDefault "list" list
@@ -21,9 +37,7 @@ module FlatList =
     let inline indexNotFound() = raise (System.Collections.Generic.KeyNotFoundException())
 
 
-    let ofSeq source: FlatList<'T> = FlatListFactory.CreateRange source
-
-    let empty<'T> : FlatList<_> = FlatListFactory.Create<'T>()
+    
 
     let length list = check list; list.Length
 
@@ -114,26 +128,11 @@ module FlatList =
 
     ////////// Building //////////
 
-    let builder(): FlatList<'T>.Builder = FlatListFactory.CreateBuilder()
-    let builderWith capacity: FlatList<'T>.Builder = FlatListFactory.CreateBuilder(capacity)
+    
 
     let toBuilder list: FlatList<_>.Builder = check list; list.ToBuilder()
-    let moveFromBuilder (builder: FlatList<_>.Builder): FlatList<_> = 
-        checkNotNull "builder" builder
-        builder.MoveToImmutable()
-    let ofBuilder (builder: FlatList<_>.Builder): FlatList<_> = 
-        checkNotNull "builder" builder
-        builder.ToImmutable()
 
-    let inline build f =
-        let builder = builder()
-        f builder
-        moveFromBuilder builder
     
-    let inline update f list =
-        let builder = toBuilder list
-        f builder
-        moveFromBuilder builder
 
     let inline private builderWithLengthOf list = builderWith <| length list
 
@@ -441,6 +440,8 @@ module FlatList =
 
     let skipWhile predicate list = skip (lengthWhile predicate list) list
 
+    let sub start stop list = skip start list |> take (stop - start - 1) 
+
     let truncate count list = if count < length list then take count list else list
     
     let splitAt index list = take index list, skip index list
@@ -469,7 +470,15 @@ module FlatList =
     let collect mapping list = concat <| map mapping list
 
     
-
+    let inline build f =
+        let builder = builder()
+        f builder
+        moveFromBuilder builder
+    
+    let inline update f list =
+        let builder = toBuilder list
+        f builder
+        moveFromBuilder builder
 
     //////////
 

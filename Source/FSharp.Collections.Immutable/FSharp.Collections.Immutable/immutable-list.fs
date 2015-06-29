@@ -9,6 +9,17 @@ open System.Collections.Immutable
 [<RequireQualifiedAccess; CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module ImmutableList =
 
+    ////////// Factory //////////
+
+    let empty<'T> = ImmutableList.Create<'T>()
+
+
+    let ofSeq (seq: 'T seq) =
+        checkNotNull "seq" seq
+        ImmutableList.CreateRange seq
+
+    let ofBuilder (builder: ImmutableList<_>.Builder) = builder.ToImmutable()
+    let builder() = ImmutableList.CreateBuilder()
      
     open System.Collections.Generic
     open System
@@ -120,14 +131,9 @@ module ImmutableList =
     let lastIndex item list = lastIndexWith HashIdentity.Structural item list
 
 
-    ////////// Factory //////////
     
-    let empty<'T> = ImmutableList.Create<'T>()
-
-
-    let ofSeq (seq: 'T seq) =
-        checkNotNull "seq" seq
-        ImmutableList.CreateRange seq
+    
+    
 
     ////////
 
@@ -171,10 +177,7 @@ module ImmutableList =
 
     ////////// Building //////////
 
-    let ofBuilder (builder: ImmutableList<_>.Builder) = builder.ToImmutable()
-
-
-    let builder() = ImmutableList.CreateBuilder()
+    
 
     let inline build f =
         let builder = builder()

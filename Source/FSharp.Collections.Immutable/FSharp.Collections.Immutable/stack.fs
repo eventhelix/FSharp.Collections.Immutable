@@ -7,15 +7,15 @@ type Stack<'T> = System.Collections.Immutable.ImmutableStack<'T>
 [<RequireQualifiedAccess; CompiledName("ImmutableStackModule")>]
 module Stack =
     type internal StackFactory = System.Collections.Immutable.ImmutableStack
+    let inline empty<'T> = StackFactory.Create<'T>()
 
+    let inline ofSeq source = StackFactory.CreateRange source
+    let inline ofArray (array: 'T[]): Stack<'T> = ofSeq array
     
     let inline private check (stack: IStack<_>) =
         checkNotNull "stack" stack
 
-    let empty<'T> = StackFactory.Create<'T>()
-
-    let ofSeq source = StackFactory.CreateRange source
-    let ofArray (array: 'T[]): Stack<'T> = ofSeq array
+    
     
     let push head stack: IStack<'T> = check stack; stack.Push head
     let cons head stack = push head stack

@@ -7,7 +7,23 @@ type HashMap<'Key, 'Value> =
 
 type HashMapBuilder<'Key, 'Value> = HashMap<'Key, 'Value>.Builder
 
+type internal HashMapFactory = System.Collections.Immutable.ImmutableDictionary
+
 module HashMap =
+    let inline empty<'Key, 'Value> = HashMapFactory.Create<'Key, 'Value>()
+
+    let inline ofSeq items =
+        checkNotNull "items" items
+        HashMapFactory.CreateRange(items)
+
+    let inline builder() = HashMapFactory.CreateBuilder()
+
+    let inline ofBuilder (mapBuilder: HashMapBuilder<_,_>) =
+        checkNotNull "mapBuilder" mapBuilder
+        mapBuilder.ToImmutable()
+
+    /////////
+
     let inline check (map: HashMap<_, _>) = checkNotNull "map" map
 
     let inline isEmpty map = check map; map.IsEmpty
@@ -34,11 +50,9 @@ module HashMap =
 
     let inline clear map: HashMap<_,_> = check map; map.Clear()
 
-    let inline toBuilder map = check map; map.ToBuilder()
+    let inline toBuilder map : HashMapBuilder<_,_> = check map; map.ToBuilder()
 
-    let inline ofBuilder (mapBuilder: HashMap<_,_>.Builder) =
-        checkNotNull "mapBuilder" mapBuilder
-        mapBuilder.ToImmutable()
+    
     // consider alternate implementation using range functions
     let inline filter predicate map =
         let builder = toBuilder map
@@ -46,6 +60,18 @@ module HashMap =
             if predicate kvp.Key kvp.Value then
                 builder.Add kvp
         builder.ToImmutable()
+
+
+type SortedMap<'Key, 'Value> =
+    System.Collections.Immutable.ImmutableSortedDictionary<'Key, 'Value>
+
+type SortedMapBuilder<'Key, 'Value> = SortedMap<'Key, 'Value>.Builder
+
+type internal SortedMapFactory =
+    System.Collections.Immutable.ImmutableSortedDictionary
+module SortedMap =
+    let inline empty<'Key, 'Value> = SortedMapFactory.Create<'Key, 'Value>()
+
 
 
 

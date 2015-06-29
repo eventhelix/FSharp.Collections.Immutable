@@ -53,6 +53,7 @@
     <Compile Include="queue.fs" />
     <Compile Include="indexed-seq.fs" />
     <Compile Include="maps.fs" />
+    <Compile Include="sets.fs" />
     <None Include="packages.config" />
     <None Include="Script.fsx" />
   </ItemGroup>
