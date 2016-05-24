@@ -33,8 +33,15 @@ module ImmutableList =
     let item index list = check list; list.[index]
 
 
-    ////////// IImmutableList //////////
+    ////////// ImmutableList //////////
 
+    let contains item (list : ImmutableList<_>) = list.Contains(item)
+
+    let reverse (list : ImmutableList<_>) = list.Reverse()
+
+    let reverseRange (index, count) (list : ImmutableList<_>) = list.Reverse(index, count)
+
+    ////////// IImmutableList //////////
 
     /// Replaces an element in the list at a given position with the specified element.
     let withItem index value list = check list; list.SetItem(index, value)
@@ -131,22 +138,6 @@ module ImmutableList =
     let lastIndex item list = lastIndexWith HashIdentity.Structural item list
 
 
-
-
-
-
-    ////////
-
-
-
-
-    ////////
-
-
-
-
-
-
     ////////// Filter-based //////////
 
     let filterFold (predicate: 'State -> 'T -> bool * 'State) initial list =
@@ -176,8 +167,6 @@ module ImmutableList =
     let takeUntil predicate list = takeWhile (not << predicate) list
 
     ////////// Building //////////
-
-
 
     let inline build f =
         let builder = builder()
@@ -253,11 +242,9 @@ module ImmutableList =
 
 
 
-
     let ofList list = ofSeq list
 
     //let ofArray (array: 'T array) = ImmutableList.Create<'T>(items = [||])
-
 
 
 
@@ -271,13 +258,13 @@ module ImmutableList =
         build <| fun builder ->
             for i = 0 to count - 1 do
                 builder.Add <| initializer i
+
     let unfold generator state =
         let rec unfoldLoop state (builder: ImmutableList<_>.Builder) =
             match generator state with
             |Some(state, item) -> builder.Add(item); unfoldLoop state builder
             |None -> ()
         build <| unfoldLoop state
-
 
 
     ////////// Seq-based //////////
@@ -303,6 +290,3 @@ module ImmutableList =
     let iter action list = check list; Seq.iter action list
 
     let toArray list = check list; Seq.toArray list
-
-
-
