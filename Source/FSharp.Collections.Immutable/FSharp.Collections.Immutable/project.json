@@ -1,8 +1,8 @@
 ﻿{
-  "copyright": "Copyright © XperiAndri 2016",
-  "description": "F# bindings for System.Collections.Immutable",
   "title": "FSharp.Collections.Immutable",
+  "description": "F# bindings for System.Collections.Immutable",
   "authors": [ "XperiAndri", "EventHelix" ],
+  "copyright": "Copyright © XperiAndri 2016",
   "version": "1.0.0-*",
 
   "packOptions": {
@@ -48,7 +48,7 @@
   },
 
   "frameworks": {
-    "netstandard1.5": {
+    "netstandard1.6": {
       "dependencies": {
         "Microsoft.FSharp.Core.netcore": "1.0.0-*",
         "NETStandard.Library": "1.5.0-rc2-*"
