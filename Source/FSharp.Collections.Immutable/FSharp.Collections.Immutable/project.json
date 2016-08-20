@@ -61,8 +61,7 @@
       "frameworkAssemblies": {
         "mscorlib": "",
         "System": "",
-        "System.Core": "",
-        "System.Collections": ""
+        "System.Core": ""
       },
       "dependencies": {
         "FSharp.Core": "4.0.0.1"
