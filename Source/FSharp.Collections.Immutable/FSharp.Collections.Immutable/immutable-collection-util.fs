@@ -5,13 +5,13 @@ namespace FSharp.Collections.Immutable
 #endif
 
 [<AutoOpen>]
-module ImmutableCollectionUtil =
+module internal ImmutableCollectionUtil =
     let inline checkNotNull name arg =
         match arg with
         |null -> nullArg name
         |_ -> ()
 
-module ErrorStrings =
+module internal ErrorStrings =
     [<Literal>]
     let InputMustBeNonNegative = "The input must be non-negative."
 

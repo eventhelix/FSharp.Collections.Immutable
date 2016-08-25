@@ -7,46 +7,46 @@ namespace FSharp.Collections.Immutable
 // The FlatList name comes from a similar construct seen in the official F# source code
 type FlatList<'T> = System.Collections.Immutable.ImmutableArray<'T>
 
-
 // based on the F# Array module source
 [<RequireQualifiedAccess; CompiledName("ImmutableArrayModule")>]
 module FlatList =
 
     type internal FlatListFactory = System.Collections.Immutable.ImmutableArray
 
-    let ofSeq source: FlatList<'T> = FlatListFactory.CreateRange source
+    let inline empty<'T> : FlatList<_> = FlatListFactory.Create<'T>()
 
-    let empty<'T> : FlatList<_> = FlatListFactory.Create<'T>()
+    let inline singleton<'T> (item : 'T) : FlatList<'T> = FlatListFactory.Create<'T> (item)
+
+    let inline ofSeq source: FlatList<'T> = FlatListFactory.CreateRange source
 
     ////////// Building //////////
 
-    let moveFromBuilder (builder: FlatList<_>.Builder): FlatList<_> = 
+    let moveFromBuilder (builder : FlatList<_>.Builder) : FlatList<_> =
         checkNotNull "builder" builder
         builder.MoveToImmutable()
-    let ofBuilder (builder: FlatList<_>.Builder): FlatList<_> = 
+    let ofBuilder (builder : FlatList<_>.Builder) : FlatList<_> =
         checkNotNull "builder" builder
         builder.ToImmutable()
 
-    let builder(): FlatList<'T>.Builder = FlatListFactory.CreateBuilder()
-    let builderWith capacity: FlatList<'T>.Builder = FlatListFactory.CreateBuilder(capacity)
+    let builder () : FlatList<'T>.Builder = FlatListFactory.CreateBuilder()
 
-    let inline checkNotDefault argName (list: FlatList<'T>) =
+    let builderWith capacity : FlatList<'T>.Builder = FlatListFactory.CreateBuilder(capacity)
+
+    let inline internal checkNotDefault argName (list : FlatList<'T>) =
         if list.IsDefault then invalidArg argName "Uninstantiated ImmutableArray/FlatList"
-    let inline check (list: FlatList<'T>) = checkNotDefault "list" list
-    
-    let inline indexNotFound() = raise (System.Collections.Generic.KeyNotFoundException())
 
+    let inline internal check (list : FlatList<'T>) = checkNotDefault "list" list
 
-    
+    let inline internal indexNotFound() = raise (System.Collections.Generic.KeyNotFoundException())
 
     let length list = check list; list.Length
 
     let item index list = check list; list.[index]
 
-    let append list1 list2: FlatList<'T> =
+    let append list1 list2 : FlatList<'T> =
         checkNotDefault "list1" list1
         checkNotDefault "list2" list2
-        list1.AddRange(list2: FlatList<_>)
+        list1.AddRange(list2 : FlatList<_>)
 
     /// Searches for the specified object and returns the zero-based index of the first occurrence within the range
     /// of elements in the list that starts at the specified index and
@@ -57,13 +57,12 @@ module FlatList =
     let indexRange index count item list =
         indexRangeWith HashIdentity.Structural index count item list
     let indexFromWith comparer index item list =
-        indexRangeWith comparer index (length list - index) item 
+        indexRangeWith comparer index (length list - index) item
     let indexFrom index item list =
         indexFromWith HashIdentity.Structural index item list
     let indexWith comparer item list =
         indexFromWith comparer 0 item list
     let index item list = indexWith HashIdentity.Structural item list
-    
 
     /// Searches for the specified object and returns the zero-based index of the last occurrence within the
     /// range of elements in the list that contains the specified number
@@ -95,13 +94,12 @@ module FlatList =
     /// Removes the specified objects from the list.
     let removeAll items list = removeAllWith HashIdentity.Structural items list
 
-
     /// Removes all the elements that do not match the conditions defined by the specified predicate.
     let filter predicate list: FlatList<_> =
-        check list    
+        check list
         System.Predicate(not << predicate)
         |> list.RemoveAll
-    
+
     /// Removes all the elements that do not match the conditions defined by the specified predicate.
     let where predicate list = filter predicate list
 
@@ -121,18 +119,13 @@ module FlatList =
     let sortRangeWith comparer index count list =
         sortRangeWithComparer (ComparisonIdentity.FromFunction comparer) index count list
     let sortRange index count list = sortRangeWithComparer ComparisonIdentity.Structural index count list
-    let sortWithComparer comparer list = check list; list.Sort(comparer)
+    let sortWithComparer (comparer : System.Collections.Generic.IComparer<_>) list = check list; list.Sort(comparer)
     let sortWith comparer list = sortWithComparer (ComparisonIdentity.FromFunction comparer) list
     let sort list = check list; list.Sort()
 
-
     ////////// Building //////////
 
-    
-
     let toBuilder list: FlatList<_>.Builder = check list; list.ToBuilder()
-
-    
 
     let inline private builderWithLengthOf list = builderWith <| length list
 
@@ -140,7 +133,7 @@ module FlatList =
         let inline private check (builder: FlatList<'T>.Builder) = checkNotNull "builder" builder
 
         let add item builder = check builder; builder.Add(item)
-    
+
     ////////// Loop-based //////////
 
     let init count initializer =
@@ -151,9 +144,9 @@ module FlatList =
         moveFromBuilder builder
 
     let rec private concatAddLengths (arrs: FlatList<FlatList<_>>) i acc =
-        if i >= length arrs then acc 
+        if i >= length arrs then acc
         else concatAddLengths arrs (i+1) (acc + arrs.[i].Length)
-                
+
     let concat (arrs : FlatList<FlatList<'T>>) = // consider generalizing
         let result: FlatList<'T>.Builder = builderWith <| concatAddLengths arrs 0 0
         for i = 0 to length arrs - 1 do
@@ -184,7 +177,7 @@ module FlatList =
             res.Add(group.Key, group.Value)
             i <- i + 1
         moveFromBuilder res
-    
+
     let indexed list =
         check list
         let builder = builderWithLengthOf list
@@ -206,50 +199,50 @@ module FlatList =
         for i = 0 to len - 1 do
             f.Invoke(list1.[i], list2.[i])
 
-    let distinctBy projection (list: FlatList<'T>) = 
+    let distinctBy projection (list: FlatList<'T>) =
         let builder: FlatList<'T>.Builder = builderWith <| length list
         let set = System.Collections.Generic.HashSet<'Key>(HashIdentity.Structural)
         let mutable outputIndex = 0
-        
+
         for i = 0 to length list - 1 do
             let item = list.[i]
             if set.Add <| projection item then
                 outputIndex <- outputIndex + 1
                 Builder.add item builder
-        
+
         ofBuilder builder
 
-    let map2 mapping list1 list2 = 
+    let map2 mapping list1 list2 =
         checkNotDefault "list1" list1
         checkNotDefault "list2" list2
         let f = OptimizedClosures.FSharpFunc<_,_,_>.Adapt(mapping)
-        let len1 = list1.Length 
+        let len1 = list1.Length
         if len1 <> list2.Length then invalidArg "list2" ErrorStrings.ListsHaveDifferentLengths
         let res = builderWith len1
-        for i = 0 to len1 - 1 do 
+        for i = 0 to len1 - 1 do
             res.Add <| f.Invoke(list1.[i], list2.[i])
         moveFromBuilder res
 
-    let map3 mapping list1 list2 list3 = 
+    let map3 mapping list1 list2 list3 =
         checkNotDefault "list1" list1
         checkNotDefault "list2" list2
         checkNotDefault "list3" list3
         let f = OptimizedClosures.FSharpFunc<_,_,_,_>.Adapt(mapping)
         let len1 = list1.Length
         if not (len1 = list2.Length && len1 = list3.Length) then invalidArg "" ErrorStrings.ListsHaveDifferentLengths
-            
+
         let res = builderWith len1
         for i = 0 to len1 - 1 do
             res.Add <| f.Invoke(list1.[i], list2.[i], list3.[i])
         moveFromBuilder res
-    let mapi2 mapping list1 list2 = 
+    let mapi2 mapping list1 list2 =
         checkNotDefault "list1" list1
         checkNotDefault "list2" list2
         let f = OptimizedClosures.FSharpFunc<_,_,_,_>.Adapt(mapping)
-        let len1 = list1.Length 
+        let len1 = list1.Length
         if len1 <> list2.Length then invalidArg "list2" ErrorStrings.ListsHaveDifferentLengths
-        let res = builderWith len1 
-        for i = 0 to len1 - 1 do 
+        let res = builderWith len1
+        for i = 0 to len1 - 1 do
             res.Add <| f.Invoke(i,list1.[i], list2.[i])
         moveFromBuilder res
 
@@ -257,16 +250,16 @@ module FlatList =
         check list
         let f = OptimizedClosures.FSharpFunc<_,_,_>.Adapt(action)
         let len = list.Length
-        for i = 0 to len - 1 do 
+        for i = 0 to len - 1 do
             f.Invoke(i, list.[i])
 
-    let iteri2 action list1 list2 = 
+    let iteri2 action list1 list2 =
         checkNotDefault "list1" list1
         checkNotDefault "list2" list2
         let f = OptimizedClosures.FSharpFunc<_,_,_,_>.Adapt(action)
-        let len1 = list1.Length 
+        let len1 = list1.Length
         if len1 <> list2.Length then invalidArg "list2" ErrorStrings.ListsHaveDifferentLengths
-        for i = 0 to len1 - 1 do 
+        for i = 0 to len1 - 1 do
             f.Invoke(i,list1.[i], list2.[i])
 
     let mapi mapping list =
@@ -274,7 +267,7 @@ module FlatList =
         let f = OptimizedClosures.FSharpFunc<_,_,_>.Adapt(mapping)
         let len = list.Length
         let res = builderWithLengthOf list
-        for i = 0 to len - 1 do 
+        for i = 0 to len - 1 do
             res.Add <| f.Invoke(i,list.[i])
         moveFromBuilder res
 
@@ -293,7 +286,7 @@ module FlatList =
             i <- i + 1
         state
 
-    let exists2 predicate list1 list2 = 
+    let exists2 predicate list1 list2 =
         checkNotDefault "list1" list1
         checkNotDefault "list2" list2
         let f = OptimizedClosures.FSharpFunc<_,_,_>.Adapt(predicate)
@@ -308,7 +301,7 @@ module FlatList =
         let rec loop i = i >= len || (predicate list.[i] && loop (i+1))
         loop 0
 
-    let forall2 predicate list1 list2 = 
+    let forall2 predicate list1 list2 =
         checkNotDefault "list1" list1
         checkNotDefault "list2" list2
         let f = OptimizedClosures.FSharpFunc<_,_,_>.Adapt(predicate)
@@ -316,7 +309,7 @@ module FlatList =
         if len1 <> list2.Length then invalidArg "list2" ErrorStrings.ListsHaveDifferentLengths
         let rec loop i = i >= len1 || (f.Invoke(list1.[i], list2.[i]) && loop (i+1))
         loop 0
-    
+
     let groupBy projection list =
         check list
         let dict = new System.Collections.Generic.Dictionary<'Key,ResizeArray<'T>>(HashIdentity.Structural)
@@ -326,13 +319,13 @@ module FlatList =
             let v = list.[i]
             let key = projection v
             let ok, prev = dict.TryGetValue(key)
-            if ok then 
+            if ok then
                 prev.Add(v)
-            else 
+            else
                 let prev = new ResizeArray<'T>(1)
                 dict.[key] <- prev
                 prev.Add(v)
-                     
+
         // Return the list-of-lists.
         let result = builderWith dict.Count
         let mutable i = 0
@@ -342,87 +335,83 @@ module FlatList =
 
         moveFromBuilder result
 
-    let pick chooser list = 
+    let pick chooser list =
         check list
-        let rec loop i = 
-            if i >= list.Length then 
+        let rec loop i =
+            if i >= list.Length then
                 indexNotFound()
-            else 
-                match chooser list.[i] with 
+            else
+                match chooser list.[i] with
                 | None -> loop(i+1)
                 | Some res -> res
-        loop 0 
+        loop 0
 
-    let tryPick chooser list = 
+    let tryPick chooser list =
         check list
-        let rec loop i = 
-            if i >= list.Length then None else 
-            match chooser list.[i] with 
+        let rec loop i =
+            if i >= list.Length then None else
+            match chooser list.[i] with
             | None -> loop(i+1)
             | res -> res
-        loop 0 
+        loop 0
 
-    let choose chooser list = 
+    let choose chooser list =
         check list
         let res = builderWith list.Length
-        for i = 0 to list.Length - 1 do 
-            match chooser list.[i] with 
+        for i = 0 to list.Length - 1 do
+            match chooser list.[i] with
             | None -> ()
             | Some b -> res.Add(b)
         ofBuilder res
-    
-    let partition predicate list = 
+
+    let partition predicate list =
         check list
-        let res1 = builderWith list.Length 
-        let res2 = builderWith list.Length 
-        for i = 0 to list.Length - 1 do 
-            let x = list.[i] 
+        let res1 = builderWith list.Length
+        let res2 = builderWith list.Length
+        for i = 0 to list.Length - 1 do
+            let x = list.[i]
             if predicate x then res1.Add(x) else res2.Add(x)
         ofBuilder res1, ofBuilder res2
 
-
-    let find predicate list = 
+    let find predicate list =
         check list
-        let rec loop i = 
+        let rec loop i =
             if i >= list.Length then indexNotFound() else
             if predicate list.[i] then list.[i]  else loop (i+1)
-        loop 0 
-    let tryFind predicate list = 
+        loop 0
+    let tryFind predicate list =
         check list
-        let rec loop i = 
-            if i >= list.Length then None else 
+        let rec loop i =
+            if i >= list.Length then None else
             if predicate list.[i] then Some list.[i]  else loop (i+1)
         loop 0
-    let findBack predicate list = 
+    let findBack predicate list =
         check list
-        let rec loop i = 
+        let rec loop i =
             if i < 0 then indexNotFound() else
             if predicate list.[i] then list.[i]  else loop (i - 1)
         loop <| length list - 1
-    let tryFindBack predicate list = 
+    let tryFindBack predicate list =
         check list
-        let rec loop i = 
-            if i < 0 then None else 
+        let rec loop i =
+            if i < 0 then None else
             if predicate list.[i] then Some list.[i]  else loop (i+1)
         loop <| length list - 1
 
-
     let findIndexBack predicate list =
         check list
-        let rec loop i = 
+        let rec loop i =
             if i < 0 then indexNotFound() else
             if predicate list.[i] then i  else loop (i - 1)
         loop <| length list - 1
 
     let tryFindIndexBack predicate list =
         check list
-        let rec loop i = 
+        let rec loop i =
             if i < 0 then None else
             if predicate list.[i] then Some i  else loop (i - 1)
         loop <| length list - 1
     // TODO: windowed
-
-
 
     ////////// Based on other operations //////////
 
@@ -440,10 +429,10 @@ module FlatList =
 
     let skipWhile predicate list = skip (lengthWhile predicate list) list
 
-    let sub start stop list = skip start list |> take (stop - start - 1) 
+    let sub start stop list = skip start list |> take (stop - start - 1)
 
     let truncate count list = if count < length list then take count list else list
-    
+
     let splitAt index list = take index list, skip index list
 
     let head list = item 0 list
@@ -453,7 +442,6 @@ module FlatList =
         else None
 
     let tryHead list = tryItem 0 list
-
 
     let last list = item (length list - 1) list
 
@@ -469,12 +457,11 @@ module FlatList =
 
     let collect mapping list = concat <| map mapping list
 
-    
     let inline build f =
         let builder = builder()
         f builder
         moveFromBuilder builder
-    
+
     let inline update f list =
         let builder = toBuilder list
         f builder
@@ -482,15 +469,4 @@ module FlatList =
 
     //////////
 
-module ImmutableArray = FlatList    
-
-    
-
-    
-
-
-    
-
-
-
-
+module ImmutableArray = FlatList
