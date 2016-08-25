@@ -11,27 +11,26 @@ module ImmutableList =
 
     ////////// Factory //////////
 
-    let empty<'T> = ImmutableList.Create<'T>()
+    let inline internal check (list: IImmutableList<_>) = checkNotNull "list" list
 
+    let inline empty<'T> = ImmutableList.Create<'T>()
 
-    let ofSeq (seq: 'T seq) =
-        checkNotNull "seq" seq
-        ImmutableList.CreateRange seq
+    let inline singleton<'T> (item : 'T) : ImmutableList<'T> = ImmutableList.Create<'T> (item)
 
-    let ofBuilder (builder: ImmutableList<_>.Builder) = builder.ToImmutable()
-    let builder() = ImmutableList.CreateBuilder()
+    let inline ofSeq (seq : 'T seq) = checkNotNull "seq" seq; ImmutableList.CreateRange seq
+
+    let inline ofBuilder (builder : ImmutableList<_>.Builder) = builder.ToImmutable()
+
+    let inline builder() = ImmutableList.CreateBuilder()
 
     open System.Collections.Generic
     open System
-
-    let inline check (list: IImmutableList<_>) = checkNotNull "list" list
 
     ////////// IReadOnly* //////////
 
     let length list = check list; list.Count
 
     let item index list = check list; list.[index]
-
 
     ////////// ImmutableList //////////
 
