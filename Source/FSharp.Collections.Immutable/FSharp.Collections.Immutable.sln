@@ -3,12 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29021.104
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{401436C6-97D7-47A2-BFAD-FD65D34E2AA0}"
-	ProjectSection(SolutionItems) = preProject
-		NuGet.Config = NuGet.Config
-	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FSharp.Collections.Immutable", "FSharp.Collections.Immutable\FSharp.Collections.Immutable.fsproj", "{B5206296-9F17-41D9-809B-6B42DF529852}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FSharp.Collections.Immutable", "FSharp.Collections.Immutable\FSharp.Collections.Immutable.fsproj", "{B5206296-9F17-41D9-809B-6B42DF529852}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
