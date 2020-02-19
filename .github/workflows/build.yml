@@ -1,12 +1,15 @@
 name: .NET Core
 
+on:
+  push:
+    branches-ignore:
+      - master
+
 jobs:
   build:
-    on:
-      push:
-        branches-ignore:
-          - master
-        runs-on: ubuntu-latest
+
+    runs-on: ubuntu-latest
+
     steps:
     - uses: actions/checkout@v2
     - name: Setup .NET Core
@@ -22,18 +25,4 @@ jobs:
         key=${{secrets.MyGet_Key}}
         dotnet nuget push -s $source -k $key nuget/*.nupkg
 
-  release:
-    on:
-      create:
-        types:
-          - tag
-        branches:
-          - master
-    steps:
-      - name: Release Version
-        run: |
-          dotnet pack -c Release -o nuget
-          source=https://api.nuget.org/v3/index.json
-          key=${{secrets.NuGet_Key}}
-          # dotnet nuget push -s $source -k $key nuget/*.nupkg
-          echo "This should only run on tag create"
+
