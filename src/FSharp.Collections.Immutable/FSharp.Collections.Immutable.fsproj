@@ -5,13 +5,17 @@
     <Description>F# bindings for System.Collections.Immutable</Description>
     <Copyright>Copyright © XperiAndri 2016</Copyright>
     <AssemblyTitle>FSharp.Collections.Immutable</AssemblyTitle>
-    <VersionPrefix>0.1.0</VersionPrefix>
+    <Description>F# bindings for System.Collections.Immutable</Description>
+    <Company>XperiAndri</Company>
+    <ProductName>FSharp.Collections.Immutable</ProductName>
+    <Copyright>Copyright © XperiAndri 2016</Copyright>
+    <Version>0.1.0</Version>
     <Authors>XperiAndri;EventHelix</Authors>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageId>FSharp.Collections.Immutable</PackageId>
     <PackageTags>System;Immutable;Collections;FSharp;F#</PackageTags>
     <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/xperiandri/FSharp.Collections.Immutable/</RepositoryUrl>
+    <RepositoryUrl>https://github.com/fsprojects/FSharp.Collections.Immutable/</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
