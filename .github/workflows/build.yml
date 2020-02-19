@@ -11,9 +11,13 @@ jobs:
     - uses: actions/checkout@v2
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
-      #with:
-      #  dotnet-version: 2.2.108
     - name: Build with dotnet
       run: |
         dotnet --version
         dotnet build --configuration Release
+        dotnet pack --no-build -c Release
+    - name: NuGet push
+      run: |
+        source=ADD_SOURCE_URL_HERE
+        key=ADD_NUGET_KEY #${{secrets.myget_froto_api_key}}
+        echo "dotnet nuget push -s $source -k $key nuget/*.nupkg"
