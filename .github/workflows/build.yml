@@ -13,8 +13,8 @@ jobs:
       uses: actions/setup-dotnet@v1
     - name: Build with dotnet
       run: |
-        dotnet --version
-        dotnet build --configuration Release
+        DOTNET_CLI_TELEMETRY_OPTOUT=1
+        dotnet build --nologo --configuration Release
         dotnet pack --no-build -c Release
     - name: NuGet push
       run: |
