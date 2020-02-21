@@ -1,14 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <Description>F# bindings for System.Collections.Immutable</Description>
     <Copyright>Copyright © XperiAndri 2016</Copyright>
     <AssemblyTitle>FSharp.Collections.Immutable</AssemblyTitle>
     <VersionPrefix>0.1.0</VersionPrefix>
     <Authors>XperiAndri;EventHelix</Authors>
-    <TargetFramework>netstandard2.0</TargetFramework>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <AssemblyName>FSharp.Collections.Immutable</AssemblyName>
     <PackageId>FSharp.Collections.Immutable</PackageId>
     <PackageTags>System;Immutable;Collections;FSharp;F#</PackageTags>
     <RepositoryType>git</RepositoryType>
@@ -16,7 +15,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Properties\assemblyInfo.fs" />
     <Compile Include="immutable-collection-util.fs" />
     <Compile Include="flat-list.fs" />
     <Compile Include="stack.fs" />
