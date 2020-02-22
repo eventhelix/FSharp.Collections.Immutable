@@ -16,9 +16,8 @@ jobs:
       uses: actions/setup-dotnet@v1
     - name: Build with dotnet
       run: |
-        DOTNET_CLI_TELEMETRY_OPTOUT=1
-        dotnet build --nologo --configuration Release
-        dotnet pack --no-build -c Release -o nuget
+        sed -i "s|<Version>\(.*\)</Version>|<Version>\1-ci-$GITHUB_RUN_ID</Version>|" src/FSharp.Collections.Immutable/FSharp.Collections.Immutable.fsproj
+        dotnet pack --nologo --configuration Release -o nuget
     - name: MyGet push
       run: |
         source=https://www.myget.org/F/fsharp-collections-immutable/api/v3/index.json
