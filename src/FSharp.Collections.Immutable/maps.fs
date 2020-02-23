@@ -52,7 +52,7 @@ module HashMap =
 
     let inline toBuilder map : HashMapBuilder<_,_> = check map; map.ToBuilder()
 
-    
+
     // consider alternate implementation using range functions
     let inline filter predicate map =
         let builder = toBuilder map
@@ -71,11 +71,3 @@ type internal SortedMapFactory =
     System.Collections.Immutable.ImmutableSortedDictionary
 module SortedMap =
     let inline empty<'Key, 'Value> = SortedMapFactory.Create<'Key, 'Value>()
-
-
-
-
-
-
-    
-
