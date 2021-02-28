@@ -1,5 +1,7 @@
 ﻿namespace FSharp.Collections.Immutable
 
+open System.Collections.Generic
+
 type IMap<'Key, 'Value> = System.Collections.Immutable.IImmutableDictionary<'Key, 'Value>
 
 type HashMap<'Key, 'Value> =
@@ -15,6 +17,12 @@ module HashMap =
     let inline ofSeq items =
         checkNotNull "items" items
         HashMapFactory.CreateRange(items)
+
+    let inline ofSeqWith getId items =
+        checkNotNull "items" items
+        items
+        |> Seq.map (fun i -> KeyValuePair(getId i, i))
+        |> HashMapFactory.CreateRange
 
     let inline builder() = HashMapFactory.CreateBuilder()
 
@@ -71,3 +79,55 @@ type internal SortedMapFactory =
     System.Collections.Immutable.ImmutableSortedDictionary
 module SortedMap =
     let inline empty<'Key, 'Value> = SortedMapFactory.Create<'Key, 'Value>()
+
+    let inline ofSeq items =
+        checkNotNull "items" items
+        SortedMapFactory.CreateRange(items)
+
+    let inline ofSeqWith getId items =
+        checkNotNull "items" items
+        items
+        |> Seq.map (fun i -> KeyValuePair(getId i, i))
+        |> SortedMapFactory.CreateRange
+
+    let inline builder() = SortedMapFactory.CreateBuilder()
+
+    let inline ofBuilder (mapBuilder: SortedMapBuilder<_,_>) =
+        checkNotNull "mapBuilder" mapBuilder
+        mapBuilder.ToImmutable()
+
+    let inline check (map: SortedMap<_, _>) = checkNotNull "map" map
+
+    let inline isEmpty map = check map; map.IsEmpty
+    let inline length map = check map; map.Count
+
+    let inline keyComparer map = check map; map.KeyComparer
+
+    let inline containsKey key map = check map; map.ContainsKey key
+
+    let inline find key map = check map; map.[key]
+    let inline tryFind key map =
+        check map
+        let mutable value = Unchecked.defaultof<_>
+        if map.TryGetValue(key, &value) then Some value else None
+
+    let inline add key value map : SortedMap<_,_> = check map; map.Add(key, value)
+    let inline append map pairs : SortedMap<_,_> =
+        check map
+        checkNotNull "pairs" pairs
+        map.AddRange pairs
+
+    let inline remove key map : SortedMap<_,_> = check map; map.Remove key
+    let inline except keys map : SortedMap<_,_> = check map; map.RemoveRange keys
+
+    let inline clear map: SortedMap<_,_> = check map; map.Clear()
+
+    let inline toBuilder map : SortedMapBuilder<_,_> = check map; map.ToBuilder()
+
+    // consider alternate implementation using range functions
+    let inline filter predicate map =
+        let builder = toBuilder map
+        for kvp in map do
+            if predicate kvp.Key kvp.Value then
+                builder.Add kvp
+        builder.ToImmutable()
