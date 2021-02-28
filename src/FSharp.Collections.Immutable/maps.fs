@@ -77,6 +77,7 @@ type SortedMapBuilder<'Key, 'Value> = SortedMap<'Key, 'Value>.Builder
 
 type internal SortedMapFactory =
     System.Collections.Immutable.ImmutableSortedDictionary
+
 module SortedMap =
     let inline empty<'Key, 'Value> = SortedMapFactory.Create<'Key, 'Value>()
 
@@ -93,10 +94,10 @@ module SortedMap =
     let inline builder() = SortedMapFactory.CreateBuilder()
 
     let inline ofBuilder (mapBuilder: SortedMapBuilder<_,_>) =
-        checkNotNull "mapBuilder" mapBuilder
+        checkNotNull "sortedMapBuilder" mapBuilder
         mapBuilder.ToImmutable()
 
-    let inline check (map: SortedMap<_, _>) = checkNotNull "map" map
+    let inline check (map: SortedMap<_, _>) = checkNotNull "sortedMap" map
 
     let inline isEmpty map = check map; map.IsEmpty
     let inline length map = check map; map.Count
