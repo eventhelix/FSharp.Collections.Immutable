@@ -1,4 +1,4 @@
-#if INTERACTIVE
+﻿#if INTERACTIVE
 namespace global
 #else
 namespace FSharp.Collections.Immutable
@@ -11,13 +11,13 @@ module ImmutableList =
 
     ////////// Factory //////////
 
-    let inline internal check (list: IImmutableList<_>) = checkNotNull "list" list
+    let inline internal check (list: IImmutableList<_>) = checkNotNull (nameof list) list
 
     let inline empty<'T> = ImmutableList.Create<'T>()
 
     let inline singleton<'T> (item : 'T) : ImmutableList<'T> = ImmutableList.Create<'T> (item)
 
-    let inline ofSeq (seq : 'T seq) = checkNotNull "seq" seq; ImmutableList.CreateRange seq
+    let inline ofSeq (seq : 'T seq) = checkNotNull (nameof seq) seq; ImmutableList.CreateRange seq
 
     let inline ofBuilder (builder : ImmutableList<_>.Builder) = builder.ToImmutable()
 
@@ -183,7 +183,7 @@ module ImmutableList =
     ////////// Loop-based //////////
 
     let concat lists =
-        checkNotNull "lists" lists
+        checkNotNull (nameof lists) lists
         build <| fun result ->
             for list in lists do
                 result.AddRange list
@@ -283,7 +283,7 @@ module ImmutableList =
     let forall predicate list = check list; Seq.forall predicate list
 
     let forall2 predicate (list1: IImmutableList<_>) (list2: IImmutableList<_>) =
-        checkNotNull "list1" list1; checkNotNull "list2" list2
+        checkNotNull (nameof list1) list1; checkNotNull (nameof list2) list2
         Seq.forall2 predicate list1 list2
 
     let iter action list = check list; Seq.iter action list

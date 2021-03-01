@@ -8,7 +8,7 @@ type Stack<'T> = System.Collections.Immutable.ImmutableStack<'T>
 module Stack =
     type internal StackFactory = System.Collections.Immutable.ImmutableStack
 
-    let inline internal check (stack : IStack<_>) = checkNotNull "stack" stack
+    let inline internal check (stack : IStack<_>) = checkNotNull (nameof stack) stack
 
     let inline empty<'T> = StackFactory.Create<'T>()
 
