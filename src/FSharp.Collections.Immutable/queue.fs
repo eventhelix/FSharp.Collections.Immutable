@@ -9,7 +9,7 @@ module Queue =
 
     type internal QueueFactory = System.Collections.Immutable.ImmutableQueue
 
-    let inline private check (queue: IQueue<_>) = checkNotNull "queue" queue
+    let inline private check (queue: IQueue<_>) = checkNotNull (nameof queue) queue
 
     let inline empty<'T> : Queue<'T> = QueueFactory.Create<'T>()
 
@@ -57,8 +57,8 @@ module Queue =
     let iter action queue = check queue; Seq.iter action queue
     let iteri action queue = check queue; Seq.iteri action queue
     let iter2 action (queue1: IQueue<_>) (queue2: IQueue<_>) =
-        checkNotNull "queue1" queue1
-        checkNotNull "queue2" queue2
+        checkNotNull (nameof queue1) queue1
+        checkNotNull (nameof queue2) queue2
         Seq.iter2 action queue1 queue2
 
     let fold folder state queue = check queue; Seq.fold folder state queue

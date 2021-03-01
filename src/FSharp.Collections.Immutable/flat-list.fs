@@ -22,10 +22,10 @@ module FlatList =
     ////////// Building //////////
 
     let moveFromBuilder (builder : FlatList<_>.Builder) : FlatList<_> =
-        checkNotNull "builder" builder
+        checkNotNull (nameof builder) builder
         builder.MoveToImmutable()
     let ofBuilder (builder : FlatList<_>.Builder) : FlatList<_> =
-        checkNotNull "builder" builder
+        checkNotNull (nameof builder) builder
         builder.ToImmutable()
 
     let builder () : FlatList<'T>.Builder = FlatListFactory.CreateBuilder()
@@ -35,7 +35,7 @@ module FlatList =
     let inline internal checkNotDefault argName (list : FlatList<'T>) =
         if list.IsDefault then invalidArg argName "Uninstantiated ImmutableArray/FlatList"
 
-    let inline internal check (list : FlatList<'T>) = checkNotDefault "list" list
+    let inline internal check (list : FlatList<'T>) = checkNotDefault (nameof list) list
 
     let inline internal indexNotFound() = raise (System.Collections.Generic.KeyNotFoundException())
 
@@ -44,8 +44,8 @@ module FlatList =
     let item index list = check list; list.[index]
 
     let append list1 list2 : FlatList<'T> =
-        checkNotDefault "list1" list1
-        checkNotDefault "list2" list2
+        checkNotDefault (nameof list1) list1
+        checkNotDefault (nameof list2) list2
         list1.AddRange(list2 : FlatList<_>)
 
     /// Searches for the specified object and returns the zero-based index of the first occurrence within the range
@@ -107,7 +107,7 @@ module FlatList =
     let removeRange index (count: int) list: FlatList<_> = check list; list.RemoveRange(index, count)
 
     let blit source sourceIndex (destination: 'T[]) destinationIndex count =
-        checkNotDefault "source" source
+        checkNotDefault (nameof source) source
         try
             source.CopyTo(sourceIndex, destination, destinationIndex, count)
         with
@@ -130,14 +130,14 @@ module FlatList =
     let inline private builderWithLengthOf list = builderWith <| length list
 
     module Builder =
-        let inline private check (builder: FlatList<'T>.Builder) = checkNotNull "builder" builder
+        let inline private check (builder: FlatList<'T>.Builder) = checkNotNull (nameof builder) builder
 
         let add item builder = check builder; builder.Add(item)
 
     ////////// Loop-based //////////
 
     let init count initializer =
-        if count < 0 then invalidArg "count" ErrorStrings.InputMustBeNonNegative
+        if count < 0 then invalidArg (nameof count) ErrorStrings.InputMustBeNonNegative
         let builder = builderWith count
         for i = 0 to count - 1 do
             builder.Add <| initializer i
@@ -191,11 +191,11 @@ module FlatList =
             action list.[i]
 
     let iter2 action list1 list2 =
-        checkNotDefault "list1" list1
-        checkNotDefault "list2" list2
+        checkNotDefault (nameof list1) list1
+        checkNotDefault (nameof list2) list2
         let f = OptimizedClosures.FSharpFunc<'T,'U, unit>.Adapt(action)
         let len = length list1
-        if len <> length list2 then invalidArg "list2" ErrorStrings.ListsHaveDifferentLengths
+        if len <> length list2 then invalidArg (nameof list2) ErrorStrings.ListsHaveDifferentLengths
         for i = 0 to len - 1 do
             f.Invoke(list1.[i], list2.[i])
 
@@ -213,34 +213,37 @@ module FlatList =
         ofBuilder builder
 
     let map2 mapping list1 list2 =
-        checkNotDefault "list1" list1
-        checkNotDefault "list2" list2
+        checkNotDefault (nameof list1) list1
+        checkNotDefault (nameof list2) list2
         let f = OptimizedClosures.FSharpFunc<_,_,_>.Adapt(mapping)
         let len1 = list1.Length
-        if len1 <> list2.Length then invalidArg "list2" ErrorStrings.ListsHaveDifferentLengths
+        if len1 <> list2.Length then invalidArg (nameof list2) ErrorStrings.ListsHaveDifferentLengths
         let res = builderWith len1
         for i = 0 to len1 - 1 do
             res.Add <| f.Invoke(list1.[i], list2.[i])
         moveFromBuilder res
 
     let map3 mapping list1 list2 list3 =
-        checkNotDefault "list1" list1
-        checkNotDefault "list2" list2
-        checkNotDefault "list3" list3
+        checkNotDefault (nameof list1) list1
+        checkNotDefault (nameof list2) list2
+        checkNotDefault (nameof list3) list3
         let f = OptimizedClosures.FSharpFunc<_,_,_,_>.Adapt(mapping)
         let len1 = list1.Length
-        if not (len1 = list2.Length && len1 = list3.Length) then invalidArg "" ErrorStrings.ListsHaveDifferentLengths
+        if not (len1 = list2.Length)
+            then invalidArg (nameof list2) ErrorStrings.ListsHaveDifferentLengths
+        if not (len1 = list3.Length)
+            then invalidArg (nameof list3) ErrorStrings.ListsHaveDifferentLengths
 
         let res = builderWith len1
         for i = 0 to len1 - 1 do
             res.Add <| f.Invoke(list1.[i], list2.[i], list3.[i])
         moveFromBuilder res
     let mapi2 mapping list1 list2 =
-        checkNotDefault "list1" list1
-        checkNotDefault "list2" list2
+        checkNotDefault (nameof list1) list1
+        checkNotDefault (nameof list2) list2
         let f = OptimizedClosures.FSharpFunc<_,_,_,_>.Adapt(mapping)
         let len1 = list1.Length
-        if len1 <> list2.Length then invalidArg "list2" ErrorStrings.ListsHaveDifferentLengths
+        if len1 <> list2.Length then invalidArg (nameof list2) ErrorStrings.ListsHaveDifferentLengths
         let res = builderWith len1
         for i = 0 to len1 - 1 do
             res.Add <| f.Invoke(i,list1.[i], list2.[i])
@@ -254,11 +257,11 @@ module FlatList =
             f.Invoke(i, list.[i])
 
     let iteri2 action list1 list2 =
-        checkNotDefault "list1" list1
-        checkNotDefault "list2" list2
+        checkNotDefault (nameof list1) list1
+        checkNotDefault (nameof list2) list2
         let f = OptimizedClosures.FSharpFunc<_,_,_,_>.Adapt(action)
         let len1 = list1.Length
-        if len1 <> list2.Length then invalidArg "list2" ErrorStrings.ListsHaveDifferentLengths
+        if len1 <> list2.Length then invalidArg (nameof list2) ErrorStrings.ListsHaveDifferentLengths
         for i = 0 to len1 - 1 do
             f.Invoke(i,list1.[i], list2.[i])
 
@@ -287,11 +290,11 @@ module FlatList =
         state
 
     let exists2 predicate list1 list2 =
-        checkNotDefault "list1" list1
-        checkNotDefault "list2" list2
+        checkNotDefault (nameof list1) list1
+        checkNotDefault (nameof list2) list2
         let f = OptimizedClosures.FSharpFunc<_,_,_>.Adapt(predicate)
         let len1 = list1.Length
-        if len1 <> list2.Length then invalidArg "list2" ErrorStrings.ListsHaveDifferentLengths
+        if len1 <> list2.Length then invalidArg (nameof list2) ErrorStrings.ListsHaveDifferentLengths
         let rec loop i = i < len1 && (f.Invoke(list1.[i], list2.[i]) || loop (i+1))
         loop 0
 
@@ -302,11 +305,11 @@ module FlatList =
         loop 0
 
     let forall2 predicate list1 list2 =
-        checkNotDefault "list1" list1
-        checkNotDefault "list2" list2
+        checkNotDefault (nameof list1) list1
+        checkNotDefault (nameof list2) list2
         let f = OptimizedClosures.FSharpFunc<_,_,_>.Adapt(predicate)
         let len1 = list1.Length
-        if len1 <> list2.Length then invalidArg "list2" ErrorStrings.ListsHaveDifferentLengths
+        if len1 <> list2.Length then invalidArg (nameof list2) ErrorStrings.ListsHaveDifferentLengths
         let rec loop i = i >= len1 || (f.Invoke(list1.[i], list2.[i]) && loop (i+1))
         loop 0
 
