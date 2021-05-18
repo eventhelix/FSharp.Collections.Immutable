@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard1.6;netstandard2.0</TargetFrameworks>
+    <Description>F# bindings for System.Collections.Immutable</Description>
+    <Copyright>Copyright © XperiAndri 2016</Copyright>
+    <AssemblyTitle>FSharp.Collections.Immutable</AssemblyTitle>
+    <Company>XperiAndri</Company>
+    <ProductName>FSharp.Collections.Immutable</ProductName>
+    <Version>1.0.0</Version>
+    <Authors>XperiAndri;EventHelix;vilinski</Authors>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PackageId>FSharp.Collections.Immutable</PackageId>
+    <PackageTags>System;Immutable;Collections;FSharp;F#</PackageTags>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/fsprojects/FSharp.Collections.Immutable/</RepositoryUrl>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="immutable-collection-util.fs" />
+    <Compile Include="flat-list.fs" />
+    <Compile Include="stack.fs" />
+    <Compile Include="immutable-list.fs" />
+    <Compile Include="queue.fs" />
+    <Compile Include="indexed-seq.fs" />
+    <Compile Include="maps.fs" />
+    <Compile Include="sets.fs" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)'=='netstandard1.6'">
+    <PackageReference Update="FSharp.Core" Version="4.6.2" />
+    <PackageReference Update="System.ValueTuple" Version="4.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Collections.Immutable" Version="1.7.0" />
+  </ItemGroup>
+
+</Project>

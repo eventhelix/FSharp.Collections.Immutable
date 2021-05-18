@@ -438,12 +438,12 @@ module FlatList =
     let head list = item 0 list
 
     let tryItem index list =
-        if index < length list then Some <| item index list
-        else None
+        if index >= length list || index < 0 then None
+        else Some(list.[index])
 
     let tryHead list = tryItem 0 list
 
-    let last list = item (length list - 1) list
+    let last (list : FlatList<_>) = list.[length list - 1]
 
     let tryLast list = tryItem (length list - 1) list
 
